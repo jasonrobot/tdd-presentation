@@ -24,10 +24,10 @@ test
     } );
 #+END_SRC
 
-implementation
+implementation taking a URL
 #+BEGIN_SRC javascript
 export function shorten( link ) {
-    const productIdPart = link.pathname.match( /\/dp\/([\w\d]+)/ );
+    const productIdPart = link.pathname.match( /(B[\w\d]+)/ );
     if ( productIdPart ) {
         const shortenedLink = new URL( link.toString() );
         shortenedLink.pathname = productIdPart;
@@ -35,7 +35,136 @@ export function shorten( link ) {
         shortenedLink.hostname = 'amzn.com';
         return shortenedLink;
     }
-    return null;
 }
 #+END_SRC
 
+Shit, test fails
+
+#+BEGIN_SRC javascript
+shortenedLink.pathname = productIdPart[1];
+#+END_SRC
+
+* Step 3
+
+hookup code
+
+index.js
+#+BEGIN_SRC javascript
+import {
+    shorten,
+} from './shorten.js';
+
+function getInput() {
+    return document.querySelector( '#link' ).value;
+}
+
+function writeOutput( output = 'Unable to shorten link!' ) {
+    document.querySelector( '#result' ).textContent = output;
+}
+
+function clickHandler() {
+    writeOutput( shorten( getInput() ) );
+}
+
+document.querySelector( '#button' ).onclick = clickHandler;
+#+END_SRC
+
+Uh oh, it doesnt work!!!!
+
+* Step 4
+Adapting to changing requirements
+
+We need to take a String rather than a URL.
+
+#+BEGIN_SRC javascript
+        const testLink = 'https://www.amazon.com/Chon/dp/B07QRLNW9B?pf_rd_p=5cc0ab18-ad5f-41cb-89ad-d43149f4e286&pd_rd_wg=0YiVS&pf_rd_r=BBQGR1ZWZBMTFG2TZG4D&ref_=pd_gw_wish&pd_rd_w=yEzK2&pd_rd_r=56e3b574-f148-4f3e-9ab8-555ecf3de5cf';
+
+        const expectedShortenedLink = new URL( 'https://amzn.com/B07QRLNW9B' );
+
+        const actualShortenedLink = shorten( testLink );
+
+        expect( actualShortenedLink.toString() )
+            .toEqual( expectedShortenedLink.toString() );
+#+END_SRC
+
+implementation taking a String
+#+BEGIN_SRC javascript
+export function shorten( link ) {
+    const linkUrl = new URL( link );
+    const productIdPart = linkUrl.pathname.match( /(B[\w\d]+)/ );
+    if ( productIdPart ) {
+        const shortenedLink = new URL( linkUrl.toString() );
+        shortenedLink.pathname = productIdPart[1];
+        shortenedLink.search = '';
+        shortenedLink.hostname = 'amzn.com';
+        return shortenedLink;
+    }
+}
+#+END_SRC
+
+* Step 5
+Fixing a bug
+
+We can't support book URLs!
+
+#+BEGIN_SRC javascript
+    it( 'should shorten a book link', () => {
+        const testLink = 'https://www.amazon.com/Stand-Zanzibar-Hugo-Award-Winning-Novel/dp/0765326787';
+
+        const expectedShortenedLink = new URL( 'https://amzn.com/0765326787' );
+
+        const actualShortenedLink = shorten( testLink );
+
+        expect( actualShortenedLink.toString() )
+            .toEqual( expectedShortenedLink.toString() );
+    } );
+#+END_SRC
+
+here's our fix
+#+BEGIN_SRC
+/\/(?:dp|gp\/product)\/([\w\d]+)/
+#+END_SRC
+
+* Step 6
+Red, Green, Refactor
+
+We want to break things up a bit, so we start with our tests.
+
+Here's some tests for getting the product ID
+#+BEGIN_SRC javascript
+    describe( 'getSpecialProductId', () => {
+        it( 'should work on a \'B\' link', () => {
+            const id = getSpecialProductId(
+                new URL( 'http://a.co/dp/B123456?foo=bar' ),
+            );
+            expect( id ).toEqual( 'B123456' );
+        } );
+
+        it( 'should work on a book link', () => {
+            const id = getSpecialProductId(
+                new URL( 'http://a.co/dp/123456/foo/bar' ),
+            );
+            expect( id ).toEqual( '123456' );
+        } );
+
+        it( 'should work on a gp/product link', () => {
+            const url = new URL( 'https://www.amazon.com/gp/product/B07CJN69MV/ref=s9_acsd_al_bw_c_x_3_w?pf_rd_m=ATVPDKIKX0DER&pf_rd_s=merchandised-search-5&pf_rd_r=F3CNC9EYPP3PA4X4S4XF&pf_rd_t=101&pf_rd_p=559a880c-b191-4be9-9883-341b6eabf178&pf_rd_i=19461882011' );
+
+            const id = getSpecialProductId( url );
+
+            expect( id ).toEqual( 'B07CJN69MV' );
+        } );
+
+        it( 'should return null when there is no ID', () => {
+            const id = getSpecialProductId(
+                new URL( 'http://a.co/whatever/B123456?foo=bar' ),
+            );
+            expect( id ).toBeNull();
+        } );
+    } );
+#+END_SRC
+
+Here's some tests for making the new amazon url
+#+BEGIN_SRC javascript
+
+#+END_SRC
