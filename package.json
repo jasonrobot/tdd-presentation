@@ -1,0 +1,8 @@
+{
+  "name": "tdd-presentation",
+  "version": "1.0.0",
+  "description": "showing how to do TDD",
+  "main": "index.js",
+  "author": "jason howell",
+  "license": "GPLv3"
+}

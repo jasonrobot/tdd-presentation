@@ -1,0 +1,13 @@
+name: tdd-presentation
+version: 0.1.0
+
+authors:
+  - Jason Howell <jasonrobot64@gmail.com>
+
+targets:
+  tdd-presentation:
+    main: src/tdd-presentation.cr
+
+crystal: 0.30.1
+
+license: MIT
