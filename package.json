@@ -4,5 +4,9 @@
   "description": "showing how to do TDD",
   "main": "index.js",
   "author": "jason howell",
-  "license": "GPLv3"
+  "license": "GPLv3",
+  "devDependencies": {
+    "eslint": "^6.4.0",
+    "jest": "^24.9.0"
+  }
 }
