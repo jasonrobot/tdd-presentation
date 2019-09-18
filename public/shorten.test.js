@@ -1,9 +1,10 @@
 import {
-    shorten
+    shorten,
 } from './shorten.js';
 
-describe('shorten', () => {
+describe( 'shorten', () => {
     it( 'should be callable', () => {
         shorten();
     } );
+
 } );

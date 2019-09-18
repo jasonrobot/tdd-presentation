@@ -24,7 +24,7 @@
     },
     "scripts": {
         "test": "jest",
-        "lint": "./node_modules/.bin/eslint ."
+        "lint": "./node_modules/.bin/eslint --fix public/"
     },
     "jest": {
         "transform": {
